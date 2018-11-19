@@ -1,0 +1,441 @@
+---
+title: "LEC 2"
+author: "Maria Retamal Fuentes, Teodoro Hochfärber Salinas"
+date: "18 de noviembre de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+#Nota
+Se utilizo Python3 para el uso de este laboratorio.
+
+## Pregunta 1
+- Si en el primer turno el jugador saca 5 cartas de la baraja (sin reemplazo) ¿Cual es la probabilidad de
+que su mano sea no consistente?
+```{r}
+
+magia <- rep("magia", 10)
+monstruo <- rep("monstruo", 20)
+trampa <- rep("trampa", 10)
+
+baraja <- c(monstruo, magia, trampa) 
+casosFavorables <- 0
+
+for(i in 1:500){
+  mano <- sample(baraja, size = 5)
+  a <- "trampa" %in% mano
+  b <- "monstruo" %in% mano
+  c <- "magia" %in% mano
+
+  if(a & b & c){
+    casosFavorables <- casosFavorables + 1
+  }
+}
+
+probnofav<- 1 - casosFavorables / 500
+```
+Por lo tanto la probabilidad de que su mano no sea consistente es:
+```{r}
+probnofav
+```
+
+- Si ahora consideramos que el jugador roba (sacar sin reemplazo) una carta en su primer turno, ¿Cual es la nueva probabilidad de que la mano no sea consistente?
+
+```{r}
+
+magia <- rep("magia", 10)
+monstruo <- rep("monstruo", 20)
+trampa <- rep("trampa", 10)
+
+baraja <- c(monstruo, magia, trampa) 
+casosFavorables <- 0
+
+for(i in 1:500){
+  mano <- sample(baraja, size = 6)
+  a <- "trampa" %in% mano
+  b <- "monstruo" %in% mano
+  c <- "magia" %in% mano
+
+  if(a & b & c){
+    casosFavorables <- casosFavorables + 1
+  }
+}
+
+nocons<-1 - casosFavorables / 500
+```
+Entonces la probabilidad de que la mano no sea consistente es: 
+```{r}
+nocons
+```
+
+
+- En el juego, el jugador obtiene una mano inicial de 5 cartas y además roba al comienzo de cada turno (incluyendo el primero) 1 carta extra. El jugador cree tener muchos monstruos en su baraja, por lo que cambia 5 de estos por trampas, con la idea de poder defenderse con estas trampas por los primeros 2 turnos hasta obtener un monstruo. ¿Cual es la probabilidad de que se cumpla esta estrategia del jugador? esto es, obtener 2 de estas trampas nuevas en la mano original o en los 2 robos consecutivos y luego obtener un monstruo en el tercer robo
+```{r}
+magia <- rep("magia", 10)
+monstruo <- rep("monstruo", 20)
+trampa <- rep("trampa", 10)
+trampaN <- rep("trampanueva", 5)
+
+barajaNueva <- c(monstruo, magia, trampa, trampaN) 
+casosFavorables <- 0
+
+for(i in 1:500){
+  mano <- sample(barajaNueva, size = 8)
+  aux <- mano[1:7]
+  
+  a <- aux[aux == "trampanueva"]
+
+  if(length(a) == 2 & mano[8] == "monstruo"){
+    casosFavorables <- casosFavorables + 1
+  }
+}
+
+prob3<- casosFavorables / 500
+
+```
+La probabilidad es:
+```{r}
+prob3
+```
+
+- Si ahora consideramos una baraja mas compleja compuesta por 15 Monstruos debiles, 5 Monstruos fuertes, 5 Magias normales, 5 Magias de equipo, 3 Magias de campo, 5 Trampas normales y 2 ContraTrampas. ¿Cual es la probabilidad de obtener una mano (5 cartas) competitiva? considerar como no competitivo obtener en la primera mano: Monstruos fuertes, Magias de equipo o Trampas normales.
+Comente la dificultad de realizar este calculo de forma teorica.
+```{r}
+mn <- rep("magia normal", 5)
+me <- rep("magia equipo", 5)
+mc <- rep("magia campo", 3)
+md <- rep("monstruo debil", 15)
+mf <- rep("monstruo fuerte", 5)
+trampa <- rep("trampa", 5)
+contratrampa <- rep("contratrampa", 2)
+
+baraja <- c(mn, me, mc, md, mf, contratrampa, trampa) 
+casosFavorables <- 0
+
+for(i in 1:500){
+  mano <- sample(baraja, size = 5)
+  a <- "trampa" %in% mano
+  b <- "monstruo fuerte" %in% mano
+  c <- "magia equipo" %in% mano
+
+  if(a || b || c){
+    casosFavorables <- casosFavorables + 1
+  }
+}
+
+prob4<-1 - casosFavorables / 500
+
+```
+La probabilidad es:
+```{r}
+prob4
+```
+
+La dificultad de calcular la probabilidad en forma teorica esto en enumerar todos los casos posibles pues son muchas manos distintas.
+
+## Pregunta 2
+
+- Muestre como converge la probabilidad de obtener una carta de monstruo al aumentar el tama?o de las muestras con un grafico. ¿Converge al valor teorico?
+
+```{r}
+magia <- rep("magia", 10)
+monstruo <- rep("monstruo", 20)
+trampa <- rep("trampa", 10)
+
+baraja <- c(monstruo, magia, trampa) 
+converg <- c()
+for(i in 1:2000){
+  casosFavorables <- 0
+  for (j in seq(1,i)){
+    mano <- sample(baraja, size = 1)
+
+    if("monstruo" %in% mano){
+      casosFavorables <- casosFavorables + 1
+    }
+  }
+  probabilidad = casosFavorables / j
+  converg <- c(converg, probabilidad)
+}
+
+plot(1:2000,converg,
+     xlab = "Tamaño Muestra",
+     ylab = "Probabilidad",
+     main = "Obtener una carta Monstruo", type='l')
+abline(h=20/40,col="red",lwd=2)
+
+
+
+```
+
+Sí converge al valor teorico, como vemos, la línea roja nos marca la probabilidad teorica que es 0.25 y claramente converge a ese valor aprox.
+
+- Muestre como converge la probabilidad de obtener una mano inicial (5 cartas) con 5 monstruos. Muestre en el gráfico el valor teórico de esta situación. ¿Es correcta la convergencia mostrada en el gráfico?
+
+```{r}
+magia <- rep("magia", 10)
+monstruo <- rep("monstruo", 20)
+trampa <- rep("trampa", 10)
+
+baraja <- c(monstruo, magia, trampa) 
+converg <- c()
+for(i in 1:2000){
+  casosFavorables <- 0
+  for (j in seq(1,i)){
+    mano <- sample(baraja, size = 5)
+    aux <- mano[1:5]
+  
+    a <- aux[aux == "monstruo"]
+
+    if(length(a)==5){
+      casosFavorables <- casosFavorables + 1
+    }
+  }
+  probabilidad = casosFavorables / j
+  converg <- c(converg, probabilidad)
+}
+
+plot(1:2000,converg,
+     xlab = "Tamaño Muestra",
+     ylab = "Probabilidad",
+     main = "Obtener 5 cartas monstruo", type='l')
+abline(h=0.02356, col="red",lwd=2)
+
+```
+
+Sí es correcta la convergencia mostrada en el gráfico, la linea roja nos marca la probabilidad teórica que es 0.02356 aproximadamente.
+
+## Pregunta 3
+- Realizar una muestra de 1000 disparos.
+```{python, engine.path = '/usr/bin/python3'}
+
+import random
+import numpy as np
+
+
+class Player:
+
+    def __init__(self, center, dispersion, debug=False):
+        self.center = np.array(center)
+        self.dispersion = dispersion
+        self.shots_taken = 0
+        self.victory_shots = 0
+        self.debug = debug
+        self.nearest_distance = 100000
+
+    def shot(self):
+        self.shots_taken += 1
+
+        valid_shot = False
+        if self.debug:
+            print(f"Disparo: {self.shots_taken}")
+
+        while not valid_shot:
+            target_x = self.center[0] + ((random.random()- 0.5) * 2 * self.dispersion)
+            target_y = self.center[1] + ((random.random()- 0.5) * 2 * self.dispersion)
+
+            target = np.array([target_x, target_y])
+            if self.debug:
+                print(f"\t{target}")
+                print(f"\t{np.linalg.norm(target - self.center)}")
+            valid_shot = np.linalg.norm(target - self.center) <= self.dispersion
+
+        if self.hit(target):
+            self.victory_shots += 1
+            return True
+        else:
+            return False
+
+    def hit(self, target):
+        bullseye = np.array([0, 0])
+        distance = np.linalg.norm(target - bullseye)
+        self.save_nearest(distance)
+        return distance <= 1.0
+
+    def save_nearest(self,distance):
+        if distance <= self.nearest_distance:
+            self.nearest_distance = distance
+
+    def observed_probability(self):
+        return self.victory_shots / self.shots_taken
+
+    def missed_shots(self):
+        return self.shots_taken - self.victory_shots
+
+
+players = [Player([0, 0], 4), Player([1, 0], 6), Player([0, 0], 10), Player([0, 2], 5) ]
+
+dice_faces = [4,1,2,3,3,3]
+
+n = 1000
+
+
+for i in range(n):
+    selected = random.choice(dice_faces)
+    players[selected-1].shot()
+
+hits = 0
+
+for i in players:
+    hits += i.victory_shots
+
+misses = n - hits
+sum = hits - players[0].victory_shots
+```
+- ¿Cual es la probabilidad de que un disparo caiga de en el blanco (circulo centrado en 0,0 con radio
+1[cm]) dado que el disparo fue hecho por el jugador con el rifle.
+
+```{python, engine.path = '/usr/bin/python3'}
+print(f"Disparos del Jugador con Rifle:\n\tNumero de disparos: {players[0].shots_taken}, Numero de disparos acertados: {players[0].victory_shots}, Probabilidad Observada: {players[0].observed_probability()}")
+```
+
+- ¿Cual es la probabilidad de que el disparo fuera hecho por el jugador con slingshot dado que el disparo
+acert´o en el blanco?
+
+```{python, engine.path = '/usr/bin/python3'}
+print(f"De los {hits} disparos acertados, {players[2].victory_shots} fueron por el jugador con Slingshot, dando una "
+      f"probabilidad observada de { players[2].victory_shots/hits}")
+```
+
+- ¿Cual es la probabilidad de que el disparo fuera hecho por el jugador con arco y flechas dado que el
+disparo fallo?
+
+```{python, engine.path = '/usr/bin/python3'}
+print(f"De los {misses} disparos errados, {players[1].missed_shots()} fueron por el jugador "
+      f"con Arco y flecha, dando una probabilidad observada de "
+      f"{ (players[1].missed_shots()) / misses }")
+```
+
+- ¿Cual es la probabilidad de acertar un disparo dado que no se usa un arma de fuego?
+
+```{python, engine.path = '/usr/bin/python3'}
+print(f"De los {hits} disparos acertados, {sum} fueron por jugadores sin un arma de fuego, dando una "
+      f"probabilidad observada de { sum/hits}")
+```
+
+## Pregunta 4
+Como supuesto para esta pregunta, consideraremos que los ataques son simultaneos, y que por ende se pueden dar 3 situaciones: Victoria, Derrota o empate para el Phantom Assasin.
+
+- Simule varias batallas (mínimo 100) entre Phantom Assassin y un heroe con 3 veces la cantidad de vida y daño de Phantom Assassin. Para realizar esta simulación considere que en cada ciclo ambos héroes realizan un unico ataque, y el daño de este ataque se descuenta directamente de los puntos de vida del héroe. La batalla termina cuando los puntos de vida de alguno de los héroes llega a 0.
+
+```{r}
+blur <- c("si", "no", "si", "si")
+Coup_de_grace <- c("si", "no", "no", "no", "no")
+triunfoP = 0
+triunfoH = 0
+empate = 0
+for (i in (1:1000)){
+  vidaP = 1500
+  vidaH = 4500
+  while (vidaP>0 & vidaH>0){
+    if ("no" %in% sample(blur,size=1)) {
+      vidaP = vidaP - 366
+    }
+    if ("si" %in% sample(Coup_de_grace, size=1)){
+      vidaH = vidaH - 549
+      
+    } else {
+      vidaH = vidaH - 122
+    }
+  }
+  if (vidaP>0) {
+    triunfoP = triunfoP + 1
+  }else if(vidaH>0){
+    triunfoH = triunfoH + 1
+  }else{
+    empate = empate + 1
+  }
+}
+```
+
+- Simule varias batallas (m?nimo 100) entre Phantom Assassin y un h?roe con 3 veces la cantidad de vida y da?o de Phantom Assassin, ignorando la habilidad Blur.
+
+```{r}
+blur <- c("si", "no", "si", "si")
+Coup_de_grace <- c("si", "no", "no", "no", "no")
+triunfoP2 = 0
+triunfoH2 = 0
+empate2 = 0
+for (i in (1:1000)){
+  vidaP2 = 1500
+  vidaH2 = 4500
+  while (vidaP2>0 & vidaH2>0){
+    vidaP2 = vidaP2 - 366
+    if ("si" %in% sample(Coup_de_grace, size=1)){
+      vidaH2 = vidaH2 - 549
+      
+    } else {
+      vidaH2 = vidaH2 - 122
+    }
+  }
+  if (vidaP2>0) {
+    triunfoP2 = triunfoP2 + 1
+  }else if(vidaH2>0){
+    triunfoH2 = triunfoH2 + 1
+  }else{
+    empate2 = empate2 + 1
+  }
+}
+```
+
+- Simule varias batallas (m?nimo 100) entre Phantom Assassin y un h?roe con 3 veces la cantidad de vida y da?o de Phantom Assassin, ignorando la habilidad Coup de Grace.
+
+```{r}
+
+
+blur <- c("si", "no", "si", "si")
+Coup_de_grace <- c("si", "no", "no", "no", "no")
+triunfoP3 = 0
+triunfoH3 = 0
+empate3 = 0
+for (i in (1:1000)){
+  vidaP3 = 1500
+  vidaH3 = 4500
+  while (vidaP3>0 & vidaH3>0){
+    if ("no" %in% sample(blur,size=1)) {
+      vidaP3 = vidaP3 - 366
+    }
+    vidaH3= vidaH3 -122
+  }
+  if (vidaP3>0) {
+    triunfoP3 = triunfoP3 + 1
+  }else if(vidaH3>0){
+    triunfoH3 = triunfoH3 + 1
+  }else{
+    empate3 = empate3 + 1
+  }
+}
+
+```
+
+- Muestre los resultados en una tabla indicando las victorias, derrotas y empates en cada situación simulada. ¿Se puede concluir cuál habilidad es más poderosa?
+
+```{r}
+filas = c("Con ambas habilidades", "Solo habilidad Coup de Grace", "Solo habilidad Blur")
+Triunfos = c(triunfoP, triunfoP2, triunfoP3)
+derrotas = c(triunfoH, triunfoH2, triunfoH3)
+empates = c(empate, empate2, empate3)
+
+laTabla = data.frame (cbind(filas, Triunfos,derrotas, empates))
+library(knitr)
+kable(laTabla, col.names = c("Phantom Assassin","Triunfos", "Derrotas", "Empates"), caption = "Tabla")
+```
+
+
+
+Se observa que la habilidad de Blur permite tener un mayor porcentaje de triunfos. Esto se puede deber a su alta probabilidad de succeder y el hecho de que niega completamente el daño.
+
+
+## Concluciones
+
+Se observa que los datos empíricos confirman las probabilidades teoricas, cuando el modelo teórico
+utilizado se ajusta correctamente al elemento a modelar. Asi mismo cabe notar que, los datos “empíricos” son generados usando los modelos
+elegidos, por limitaciones obvias. Para confirmaciones más firmes, se deberían obtener datos reales,
+pero esto no es posible dentro de esta tarea
+
+Otro punto a recalcar, es la utilidad de estas herramientas para analizar el efecto de un cambio en los juegos en la jugabilidad de estos. Ejemplo claro son las habilidades de 
+Phantom Assasin, las cuales utilizando simulaciones simples nos permiten observar si el personaje se termina siendo OP o injugable. Asi mismo, la estadistica permite al estudiante
+evaluar las distitnas posibilidades al momento de armar una estrategia de apertura en juegos de cartas.

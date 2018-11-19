@@ -84,7 +84,7 @@ print(f"De los {hits} disparos acertados, {players[2].victory_shots} fueron por 
 
 
 print(f"De los {misses} disparos errados, {players[1].missed_shots()} fueron por el jugador "
-      f"con Arco y fleca, dando una probabilidad observada de "
+      f"con Arco y flecha, dando una probabilidad observada de "
       f"{ (players[1].missed_shots()) / misses }")
 
 # Probabilidad de acertar si no se eligio un arma de fuego

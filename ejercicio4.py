@@ -1,6 +1,5 @@
 import random
 
-
 def random_success(probability):
     choice = random.random()
     return (choice <= probability)
@@ -82,21 +81,26 @@ for i in range(n):
 
 print(f"Batallas con Blur y Coup de Grace\n\tNumero de Victorias: {victories}, Probabilidad Observada: {victories/n}")
 
-victories = 0
+victories_without_blur = 0
 
 for i in range(n):
     m = Match(False, True)
     if m.run():
-        victories += 1
+        victories_without_blur += 1
 
-print(f"Batallas con Coup de Grace\n\tNumero de Victorias: {victories}, Probabilidad Observada: {victories/n}")
+print(f"Batallas con Coup de Grace\n\tNumero de Victorias: {victories_without_blur}, Probabilidad Observada: {victories_without_blur/n}")
 
 
-victories = 0
+victories_without_coup = 0
 
 for i in range(n):
     m = Match(True, False)
     if m.run():
-        victories += 1
+        victories_without_coup += 1
 
-print(f"Batallas con Blur\n\tNumero de Victorias: {victories}, Probabilidad Observada: {victories/n}")
+print(f"Batallas con Blur\n\tNumero de Victorias: {victories_without_coup}, "
+      f"Probabilidad Observada: {victories_without_coup/n}")
+
+columns = ("Victorias", "Derrotas", "Probabilidad de victoria")
+rows = ["Con todas las habilidades", "Solo Coup de Grace", "Solo Blur"]
+
